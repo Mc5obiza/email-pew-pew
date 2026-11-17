@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
@@ -40,7 +40,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-email_graph = build_email_graph()
+email_graph: Optional[Any] = None
+
+
+def _get_email_graph() -> Any:
+    global email_graph
+    if email_graph is None:
+        email_graph = build_email_graph()
+    return email_graph
 
 
 @app.get("/health")
@@ -90,7 +97,7 @@ def generate_email(payload: GenerateEmailRequest) -> EmailOutput:
         "email_draft": None,
         "email_final": None,
     }
-    result = email_graph.invoke(state)
+    result = _get_email_graph().invoke(state)
     email = result.get("email_final")
     if email is None:
         raise HTTPException(status_code=500, detail="Email generation failed.")
@@ -156,7 +163,7 @@ def generate_bulk_emails_from_files(
             "email_draft": None,
             "email_final": None,
         }
-        result = email_graph.invoke(state)
+        result = _get_email_graph().invoke(state)
         email = result.get("email_final")
         if email is None:
             raise HTTPException(

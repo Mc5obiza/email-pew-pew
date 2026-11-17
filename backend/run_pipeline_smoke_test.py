@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 def main() -> int:
     backend_dir = Path(__file__).resolve().parent
     load_dotenv(backend_dir / ".env")
-    if not os.getenv("OPENAI_API_KEY"):
+    if not (os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")):
         print(
-            "Set OPENAI_API_KEY in the environment or backend/.env to run the live LLM smoke test.",
+            "Set OPENROUTER_API_KEY (or OPENAI_API_KEY) in the environment "
+            "or backend/.env to run the live LLM smoke test.",
             file=sys.stderr,
         )
         return 2
